@@ -1,0 +1,5 @@
+https://levelup.gitconnected.com/d3-js-and-vue-js-7a6a721eb79f
+    d3/vuejs directions
+
+https://www.enterprisedb.com/postgres-tutorials/how-install-postgres-ubuntu
+    create postgresdv
