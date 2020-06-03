@@ -54,11 +54,12 @@ def actionWeb():
     randomNum = random.randint(0,len(WEBSITES))
     try: 
         r = requests.get(f"http://{WEBSITES[randomNum]}")
-        log(f"Visiting 'http://{WEBSITES[randomNum]}")
+        log(f"Visiting http://{WEBSITES[randomNum]}")
     except Exception as e: 
-        log(f"Error!!! visiting 'http://{WEBSITES[randomNum]}: {e}")
+        log(f"Error!!! visiting http://{WEBSITES[randomNum]}: {e}")
 
 def actionEmail():
+    # Not yet tested
     msg = MIMEMultipart()
     msg['From'] = EMAIL_AUTHOR
     msg['To'] = EMAIL_TO
@@ -91,3 +92,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+# test with backend make changes
+# generate a config dictionary
+# have the file read and configure to the config dictionary
