@@ -1,5 +1,29 @@
 https://levelup.gitconnected.com/d3-js-and-vue-js-7a6a721eb79f
     d3/vuejs directions
 
+
+
+
+Postgres
+
+https://computingforgeeks.com/install-postgresql-12-on-ubuntu/
+    install postgres
+
 https://www.enterprisedb.com/postgres-tutorials/how-install-postgres-ubuntu
     create postgresdv
+
+https://www.postgis.us/presentations/PGOpen2018_data_loading.pdf
+    data loading
+
+https://www.tutorialspoint.com/postgresql/postgresql_create_table.htm
+    create table
+
+https://stackoverflow.com/questions/769683/postgresql-show-tables-in-postgresql
+    show tables in postgresqql
+
+https://www.postgresql.org/docs/9.5/datatype.html
+    postgres datatypes
+
+https://www.postgresqltutorial.com/postgresql-create-table/
+    postgres tutorials
+

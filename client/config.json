@@ -1,4 +1,3 @@
 {
-    "hostname" : "localhost:5000",
-    "url" : "127.0.0.1"
+    "hostname" : "localhost:5000"
 }

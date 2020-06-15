@@ -16,8 +16,12 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+with open('config.json', 'r') as j:
+    d = j.read()
+    d = json.loads(d)
+
 WEBSITES = []
-API_URL = ""
+API_URL = f"http://{d["hostname"]}:5000/update"
 HOSTNAME = socket.gethostname()
 WEIGHT = []
 EMAIL_TO = ""
@@ -34,7 +38,26 @@ with open('websites.csv', newline='') as csvfile:
     for row in temp:
         WEBSITES.append(row["Root Domain"])
 
+def config():
+    # used to read config file and setup configuration
+    pass
+
 def logInit():
+    # Initialize a cheeky banner
+    try: 
+        with open("banner.txt") as b:
+            line = b.readline()
+            cnt = 1
+            while line:
+                print(line.strip())
+                line = b.readline()
+                cnt += 1
+    except Exception as e: 
+        print(f"Unable to read banner.txt: {e}")
+    finally:
+        b.close()
+
+    # Initialize log
     now = datetime.now()
     with open(f'{LOG_TITLE}', 'w') as log:
         initStr = f"Castle Network Generator (CNG) Startup\n==========\nInitialized at {now}\nAPI_URL: {API_URL}\nHOSTNAME: {HOSTNAME}\nHOST OS: {OS}\nLOG_TITLE: {LOG_TITLE}\nWEIGHT: {WEIGHT}\nEMAIL_TO: {EMAIL_TO}\nEMAIL_AUTHOR: {EMAIL_AUTHOR}\nEMAIL_SERVER: {EMAIL_SERVER}\nEMAIL_SUBJECT: {EMAIL_SUBJECT}\nEMAIL_BODY: {EMAIL_BODY}\n==========\n\n"
@@ -51,7 +74,7 @@ def log(s):
         log.write(f"CNG: {dt} {s}\n")
 
 def actionWeb():
-    randomNum = random.randint(0,len(WEBSITES))
+    randomNum = random.randint(0,(len(WEBSITES)-1))
     try: 
         r = requests.get(f"http://{WEBSITES[randomNum]}")
         log(f"Visiting http://{WEBSITES[randomNum]}")
@@ -74,6 +97,23 @@ def actionEmail():
     server.sendmail(email, send_to_email, text)
     server.quit()
 
+def sendUpdate(j):
+    # used to send updates to server
+    updateCnt = 0
+    if updateCnt == 0:
+        try: 
+            requests.post(API_URL, json=j)
+            log(f"Sending update to API\n\tAPI_URL: {API_URL}\n\tDATA: {j}")
+            updateCnt += 1
+        except Exception as e:
+            log(f"Error !!! unable to send update to {API_URL}, Error: {e}")
+    else:
+        requests.put(API_URL, data=j)
+        try:
+            log(f"Sending update to API\n\tAPI_URL: {API_URL}\n\tDATA: {j}")
+        except Exception as e:
+            log(f"Error !!! unable to send update to {API_URL}, Error: {e}")
+
 def main():
     # make requests to random websies
     # send random emails to random address
@@ -82,17 +122,27 @@ def main():
 
     update = {}
     update["hostname"] = HOSTNAME
+    update["OS"] = OS
+    update["webReq"] = 0
+    update["email"] = 0
+
+    actionCnt = 0
+    updateCnt = 0
 
     while True:
         actionWeb()
-        update["webReq"] = 1
-        updateOut = json.dumps(update)
+        update["webReq"] += 1
+        actionCnt += 1
         # print(updateOut)
+        if actionCnt % 5 == 0:
+            sendUpdate(update)
+            update["webReq"] = 0
+            update["email"] = 0
+            actionCnt = 0
         time.sleep(random.randint(1,10))
-
+        
 if __name__ == "__main__":
     main()
-
 
 
 

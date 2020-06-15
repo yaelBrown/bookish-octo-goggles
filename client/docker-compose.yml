@@ -1,0 +1,11 @@
+version: '3.3'
+services:
+    python:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        container_name: CNG-Client
+        network_mode: host
+        image: 'python:latest'
+        volumes:
+            - './:/var/lib/CNG/'

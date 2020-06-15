@@ -1,0 +1,29 @@
+
+overview
+	npcs
+		windows
+		linux
+	activities
+		web
+		emails
+	reporting machines
+		hostname
+		status (client side)
+		last update
+
+
+create table overview (id int primary key not null, hostname json not null, npcs json not null, activities json not null, reporting_machines json not null);
+
+
+add psql to path: 
+	PATH=/usr/local/pgsql/bin:$PATH
+	export PATH
+
+login to psql
+	psql -h localhost -U admin -d cng
+
+\l - lists all databases
+
+
+\dt - show tables
+

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                background: #111111;
+                color: #ffffff;
+                font-family: Avenir, Helvetica, Arial, sans-serif;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-align: center;
+            }
+
+            .wrapper {
+                width: 70%
+            }
+
+            #raw {
+                display: flex;
+                flex-direction: column-reverse;
+            }
+        </style>
+
+        <title>CNG Server status</title>
+    </head>
+    <body>
+        <div class="wrapper">
+            <h1>Graph</h1>
+            <button id="keepUpdatingBtn">Keep updating</button>
+            <h1>RawData</h1>
+            <div id="raw"></div>
+        </div>
+
+        <script src='https://d3js.org/d3.v4.min.js'></script>
+        <script>
+            let raw = document.getElementById("raw")
+            let data = []
+            let keepUpdating = true
+            const keepUpdatingBtn = document.getElementById("keepUpdatingBtn")
+
+            const getData = () => {
+                fetch('http://localhost:5000/status')
+                    .then(res => res.json())
+                    .then(json => {
+                        // data.unshift(res)s
+                        console.log(JSON.stringify(json))
+                        data.push(JSON.stringify(json))
+                    }
+                )
+            }
+
+            const rawDataGen = () => {
+                let out = ""              
+                data.map(x => {
+                    out += "<div>"
+                    out += x
+                    out += "</div>"
+                })
+                return out
+            }
+
+            const toggleKeepupdating = () => {
+                if (keepUpdating == true) {
+                    keepUpdating = false
+                } else {
+                    keepUpdating = true
+                }
+                console.log("Keep Updating button was pressed")
+            }
+
+            keepUpdatingBtn.addEventListener("click", toggleKeepupdating)
+
+            setInterval(() => {
+                if (keepUpdating == true) {
+                    getData()
+                    raw.innerHTML = rawDataGen()
+                }
+            }, 100);
+
+            // how to update the data dynamically
+            // https://bl.ocks.org/d3noob/6bd13f974d6516f3e491
+        </script>
+    </body>
+</html>
