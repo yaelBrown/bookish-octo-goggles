@@ -21,7 +21,7 @@ with open('config.json', 'r') as j:
     d = json.loads(d)
 
 WEBSITES = []
-API_URL = f'http://{d["hostname"]}/update'
+API_URL = f'http://{d["hostname"]}:5000/update'
 HOSTNAME = socket.gethostname()
 WEIGHT = []
 EMAIL_TO = ""
