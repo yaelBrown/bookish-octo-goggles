@@ -3,26 +3,26 @@ import json
 import socket
 import platform
 import time
-
+​
 from flask import Flask, request, render_template
 from flask_cors import CORS
 from datetime import datetime
 from configparser import ConfigParser
-
+​
 """
 Example 'reporting_machines' dictionary
     'reporting_machine': {
         'hostname': '',
         'last_update': ''
     }
-
+​
     hostname - name of machine
     last_update - Date/Time of last update
 """
-
+​
 app = Flask(__name__)
 CORS(app, resources={r"*": {"origins": "*"}})
-
+​
 overview = {
     'npcs': {
         'windows': 0,
@@ -35,15 +35,17 @@ overview = {
     },
     'reporting_machines': []
 }
-
+​
+var = {}
+​
 HOSTNAME = socket.gethostname()
 OS = platform.platform()
 LOG_TITLE = f"{HOSTNAME}-{OS}-server.log"
-
+​
 def config(filename='database.ini', section='postgresql'):
     parser = ConfigParser()
     parser.read(filename)
-
+​
     db = {}
     if parser.has_section(section):
         params = parser.items(section)
@@ -51,10 +53,13 @@ def config(filename='database.ini', section='postgresql'):
             db[param[0]] = param[1]
     else:
         raise Exception('Section {0} not found in the {1} file'.format(section, filename))
-
+​
     return db
-
+​
 def banner():
+    pass
+    
+def logInit():
     # Initialize a cheeky banner
     try: 
         with open("banner.txt") as b:
@@ -68,22 +73,7 @@ def banner():
         print(f"Unable to read banner.txt: {e}")
     finally:
         b.close()
-
-def logInit():
-    # Initialize a cheeky banner
-    # try: 
-    #     with open("banner.txt") as b:
-    #         line = b.readline()
-    #         cnt = 1
-    #         while line:
-    #             print(line.strip())
-    #             line = b.readline()
-    #             cnt += 1
-    # except Exception as e: 
-    #     print(f"Unable to read banner.txt: {e}")
-    # finally:
-    #     b.close()
-
+​
     # Initialize log
     now = datetime.now()
     try: 
@@ -96,15 +86,15 @@ def logInit():
         print(f"Error initializing log: {e}")
     finally:
         log.close()
-
-
+​
+​
 def log(s):
     now = datetime.now()
     dt = now.strftime("%m/%d/%Y %H:%M:%S")
     print(f"CNG-S: {dt} {s}")
     with open(f'{LOG_TITLE}', 'a+') as log:
         log.write(f"CNG-S: {dt} {s}\n")
-
+​
 def connect(): 
     conn = None
     try: 
@@ -116,28 +106,30 @@ def connect():
         return conn.cursor()
     except (Exception, psycopg2.DatabaseError) as e:
         log(f"DB: Error: {e}")
-
+​
 @app.route("/")
 def home():
     return render_template("index.html")
-
+​
 @app.route("/update", methods=["POST", "PUT"])
 def update():
     try:
         data = request.get_json(force=True)
         
+        print(data)
+​
         overview["activities"]["web"] += data["webReq"]
         overview["activities"]["email"] += data["email"]
-
+​
         now = datetime.now()
         date_time = now.strftime("%m/%d/%Y %H:%M:%S")
         
         id = len(overview["reporting_machines"])
         
         hn = data["hostname"]
-
+​
         log(f"Recieved update from {hn}")
-
+​
         try:
             for h in overview["reporting_machines"]:
                 if data["hostname"] in h["hostname"]:
@@ -158,7 +150,7 @@ def update():
             temp = {"id": id, "hostname": data["hostname"], "last_update": date_time, "OS": data["OS"]}
             log(f"DB: adding to db: {temp}")
             overview["reporting_machines"].append(temp)    
-
+​
         cur = connect()
         try:
             npcsSQL = json.dumps(overview["npcs"])
@@ -176,26 +168,42 @@ def update():
                 log(str(overview))
         
         log(overview)
-
+​
         return {"msg": "update recieved", "overview": overview}, 200
     except Exception as e:
         print("hostname was not found in request")
         return {"msg": "error with update", "error": f"{e}"}, 418
-
+​
 @app.route("/status", methods=["GET"])
 def status():
     if overview["npcs"]["windows"] == 0 and overview["npcs"]["linux"] == 0 and overview["npcs"]["macOS"] == 0:
         log("DB: getting some data from db")
-
+​
     return overview, 200
-
+​
+@app.route("/var", methods=["GET"])
+def vars():
+    if var == {}:
+        try: 
+            with open("vars.txt", "r") as v:
+                l = v.readlines()
+                print(l)
+                for line in l:
+                    d = line.split("=")
+                    var[d[0]] = d[1]
+            out = json.dumps(var)
+            log(f"Variables: Reading var.txt: {out}")
+            return json.dumps(var), 200
+        except Exception as e:
+            out = f"Variables: Error reading var.txt: {e}"
+            log(out)
+            return var
+    else: 
+        log(f"Variables: Sending variables from memory: {var}")
+        return json.dumps(var), 200
+​
 if __name__ == "__main__":
     logInit()
     banner()
-    app.run(debug=True)
-
-
-
-
-
-# convert python json to postgres array. 
+    app.run(debug=True, host='0.0.0.0')
+    # 6.25.2020
